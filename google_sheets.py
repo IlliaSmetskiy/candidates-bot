@@ -1,15 +1,18 @@
 import gspread
 from google.oauth2.service_account import Credentials
-from config import SPREADSHEET_NAME, CREDENTIALS_PATH, worksheet_names, NEW_STATE
-
-scope = [
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive'
-]
+from config import SPREADSHEET_NAME, GOOGLE_CREDENTIALS_JSON, worksheet_names, NEW_STATE
 
 def authenticate_google_sheets():
+    creds = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+    credentials = Credentials.from_service_account_info(
+        creds,
+        scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    )
+    scope = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
     """Аутентифікація та створення клієнта Google Sheets"""
-    credentials = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
     client = gspread.authorize(credentials)
     return client
 
