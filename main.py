@@ -11,7 +11,7 @@ import time
 from contextlib import asynccontextmanager
 from database import get_connection
 from google_sheets import authenticate_google_sheets, fetch_sheet_data
-from config import format_message, CHANNEL_ID
+from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN
 from messages import MESSAGES
 # from Stripe_hosted.bot.middlewares.i18n import MyI18nMiddleware, i18n
 from aiogram.types import BotCommand, BotCommandScopeDefault
@@ -82,7 +82,7 @@ async def lifespan(app: FastAPI):
     )
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_webhook(
-        url=f"{os.environ['RAILWAY_DOMAIN']}/telegram/webhook"
+        url=f"{RAILWAY_DOMAIN}/telegram/webhook"
     )
     global background_tasks_started
 
