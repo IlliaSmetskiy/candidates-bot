@@ -1,14 +1,19 @@
 import mysql.connector
 import datetime
 from dateutil.relativedelta import relativedelta
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def get_connection():
-    return mysql.connector.connect(
-        host="illiaGW.mysql.pythonanywhere-services.com",
-        user="illiaGW",
-        password="9829Mysql",
-        database="illiaGW$default"
-        )
+    mysql.connector.connect(
+        host=os.getenv("MYSQLHOST"),
+        port=int(os.getenv("MYSQLPORT")),
+        user=os.getenv("MYSQLUSER"),
+        password=os.getenv("MYSQLPASSWORD"),
+        database=os.getenv("MYSQLDATABASE"),
+    )
+
 ALLOWED_FIELDS = {
     "subscription_id",
     "subscription_active",
