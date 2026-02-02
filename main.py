@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 import logging
 import time
 from contextlib import asynccontextmanager
-from Stripe_hosted.bot.database import get_connection
+from database import get_connection
 from google_sheets import authenticate_google_sheets, fetch_sheet_data
 from config import format_message, CHANNEL_ID
 from messages import MESSAGES
