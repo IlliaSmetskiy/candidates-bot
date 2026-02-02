@@ -80,10 +80,6 @@ async def lifespan(app: FastAPI):
         ],
         scope=BotCommandScopeDefault()
     )
-    await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_webhook(
-        url=f"{RAILWAY_DOMAIN}/telegram/webhook"
-    )
     global background_tasks_started
 
     if not background_tasks_started:
