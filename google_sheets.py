@@ -1,6 +1,8 @@
 import gspread
 from google.oauth2.service_account import Credentials
 from config import SPREADSHEET_NAME, GOOGLE_CREDENTIALS_JSON, worksheet_names, NEW_STATE
+import json
+
 
 def authenticate_google_sheets():
     creds = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
