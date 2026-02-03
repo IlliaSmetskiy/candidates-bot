@@ -11,7 +11,7 @@ def get_connection():
     try:
         mysql.connector.connect(
             host=os.getenv("MYSQLHOST"),
-            port=int(os.getenv("MYSQLPORT")),
+            port=int(os.getenv("MY_MYSQLPORT")),
             user=os.getenv("MYSQLUSER"),
             password=os.getenv("MYSQLPASSWORD"),
             database=os.getenv("MYSQLDATABASE"),
