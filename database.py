@@ -16,7 +16,7 @@ def get_connection():
         port=url.port,
         user=url.username,
         password=url.password,
-        database=url.path.lstrip("/"),
+        database="railway",
     )
 
 ALLOWED_FIELDS = {
