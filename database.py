@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 def get_connection():
-    url = urlparse(os.getenv("MYSQL_PUBLIC_URL"))
+    url = urlparse(os.environ["MYSQL_PUBLIC_URL"])
     logging.info(f"URL: {url}")
 
     return mysql.connector.connect(
