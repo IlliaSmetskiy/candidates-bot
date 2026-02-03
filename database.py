@@ -4,15 +4,20 @@ from dateutil.relativedelta import relativedelta
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import logging
+logging.basicConfig(level=logging.INFO)
 
 def get_connection():
-    mysql.connector.connect(
-        host=os.getenv("MYSQLHOST"),
-        port=int(os.getenv("MYSQLPORT")),
-        user=os.getenv("MYSQLUSER"),
-        password=os.getenv("MYSQLPASSWORD"),
-        database=os.getenv("MYSQLDATABASE"),
-    )
+    try:
+        mysql.connector.connect(
+            host=os.getenv("MYSQLHOST"),
+            port=int(os.getenv("MYSQLPORT")),
+            user=os.getenv("MYSQLUSER"),
+            password=os.getenv("MYSQLPASSWORD"),
+            database=os.getenv("MYSQLDATABASE"),
+        )
+    except Exception:
+        logging.info(host, port, user)
 
 ALLOWED_FIELDS = {
     "subscription_id",
