@@ -2,6 +2,7 @@ import mysql.connector
 import datetime
 from dateutil.relativedelta import relativedelta
 import os
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 load_dotenv()
 import logging
