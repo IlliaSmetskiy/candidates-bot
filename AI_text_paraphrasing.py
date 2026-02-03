@@ -18,7 +18,7 @@ It may contain:
 - irrelevant notes
 
 Your task:
-1. Translate to ukrainian if there is non ukrainian text
+1. Translate ALL to ukrainian
 2. Remove any duplicates, internal or irrelevant comments
 3. Rewrite the vacancy in a neutral, professional tone
 4. Return STRICT string in ukrainian with fields:
