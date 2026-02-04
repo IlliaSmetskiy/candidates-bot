@@ -1,8 +1,8 @@
 import os
 import asyncio
 import httpx
-from aiogram import Bot, Dispatcher, types
-from aiogram.types import Update
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.types import Update, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
 from fastapi import FastAPI, Request
@@ -109,7 +109,10 @@ async def send_invite(data):
                                                 member_limit=1 )
     url = invite.invite_link
     conn = get_connection()
-    lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
     logging.info("Інвайт посилання створено")
     await bot.send_message(chat_id=telegram_id, text=MESSAGES["invite_link"][lang])
     logging.info("Інвайт посилання надіслано")
@@ -125,9 +128,18 @@ async def text_user(data):
     mode = data["mode"]
     telegram_id = data["telegram_id"]
     conn = get_connection()
-    lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    message = MESSAGES[mode][lang]
-    await bot.send_message(chat_id=telegram_id, text=message)
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
+    if mode == "checkout_session_is_pending":
+        button = [[InlineKeyboardButton(MESSAGES['generate_payment_link_anyway'][lang], callback_data="generate_payment_link_anyway")]]
+        markup=InlineKeyboardMarkup(inline_keyboard=button)
+        message = MESSAGES[mode][lang]
+        await bot.send_message(chat_id=telegram_id, text=message, reply_markup=markup)
+    else:
+        message = MESSAGES[mode][lang]
+        await bot.send_message(chat_id=telegram_id, text=message)
 
 @app.post("/text-user")
 async def webhook_text_user(request: Request):
@@ -139,8 +151,11 @@ async def cmd_send_payment_link(data):
     url = data["url"]
     telegram_id = data["telegram_id"]
     conn = get_connection()
-    lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    await bot.send_message(chat_id=telegram_id, text=MESSAGES["payment_link"].format(url=url))
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
+    await bot.send_message(chat_id=telegram_id, text=MESSAGES["payment_link"][lang].format(url=url))
     return ({"status": "sent", "payment_link": url})
 
 @app.post("/cmd-send-payment-link")
@@ -152,7 +167,10 @@ async def webhook_cmd_send_payment_link(request: Request):
 async def stop_subscription(data):
     telegram_id = data["telegram_id"]
     conn = get_connection()
-    lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
     await bot.send_message(telegram_id, MESSAGES["subscription_stopped"][lang])
     await bot.ban_chat_member(
         chat_id= CHANNEL_ID,
@@ -179,7 +197,10 @@ async def cmd_start(message: types.Message):
     logging.info("Натиснуто кнопку старт")
     lang = message.from_user.language_code or "en"
     conn = get_connection()
-    set_language(conn, lang, message.from_user.id)
+    try:
+        set_language(conn, lang, message.from_user.id)
+    finally:
+        conn.close()
     await message.answer(MESSAGES["start"][lang])
 
 async def notify_server(payload, webhook):
@@ -188,15 +209,36 @@ async def notify_server(payload, webhook):
             f"https://admingw.pythonanywhere.com/{webhook}",
             json=payload
         )
-
-@dp.message(Command("subscribe"))
-async def cmd_subscribe(message: types.Message):
+@dp.callback_query(F.data == "generate_payment_link_anyway")
+async def generate_link_anyway(callback: CallbackQuery):
+    telegram_id = callback.from_user.id
     conn = get_connection()
-    telegram_id = message.from_user.id
-    lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
     asyncio.create_task(
         notify_server({
-            "telegram_id": message.from_user.id
+            "telegram_id": telegram_id,
+            "allow_new_payment": True
+        }, "create-checkout-session")
+    )
+
+    await  callback.message.answer(MESSAGES["creating_payment_link"][lang])
+    
+
+@dp.message(Command("subscribe"))
+async def cmd_subscribe(message: types.Message, allow_new_payment=False):
+    conn = get_connection()
+    telegram_id = message.from_user.id
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
+    asyncio.create_task(
+        notify_server({
+            "telegram_id": telegram_id,
+            "allow_new_payment": allow_new_payment
         }, "create-checkout-session")
     )
 
@@ -211,7 +253,10 @@ async def cmd_stop_subscription(message: types.Message):
     )
     telegram_id = message.from_user.id
     conn = get_connection()
-    lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
     await message.answer(MESSAGES["subscription_stopped"][lang])
     await bot.ban_chat_member(
         chat_id= CHANNEL_ID,
