@@ -1,7 +1,7 @@
 import os
 import asyncio
 import httpx
-from aiogram import Bot, Dispatcher, types, F
+from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.types import (Update, InlineKeyboardButton, InlineKeyboardMarkup,
     CallbackQuery, BotCommand, BotCommandScopeDefault,
     BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats,
@@ -65,6 +65,8 @@ async def daily_post_candidates(worksheet: str, interval_hours: int = 24):
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
+router = Router()
+dp.include_router(router)
 # dp.message.middleware(MyI18nMiddleware(i18n))
 
 
@@ -200,7 +202,7 @@ async def webhook_stop_subscription(request: Request):
 # Aiogram Handlers
 # -----------------------
 
-@dp.message(Command("start"))
+@route.message(Command("start"))
 async def cmd_start(message: types.Message):
     logging.info("Натиснуто кнопку старт")
     lang = message.from_user.language_code or "en"
@@ -217,7 +219,7 @@ async def notify_server(payload, webhook):
             f"https://admingw.pythonanywhere.com/{webhook}",
             json=payload
         )
-@dp.callback_query(F.data == "generate_payment_link_anyway")
+@route.callback_query(F.data == "generate_payment_link_anyway")
 async def generate_link_anyway(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=None)
     logging.info("Got Callback")
@@ -237,7 +239,7 @@ async def generate_link_anyway(callback: CallbackQuery):
     await  callback.message.answer(MESSAGES["creating_payment_link"][lang])
     
 
-@dp.message(Command("subscribe"))
+@route.message(Command("subscribe"))
 async def cmd_subscribe(message: types.Message, allow_new_payment=False):
     conn = get_connection()
     telegram_id = message.from_user.id
@@ -254,7 +256,7 @@ async def cmd_subscribe(message: types.Message, allow_new_payment=False):
 
     await message.answer(MESSAGES["creating_payment_link"][lang])
 
-@dp.message(Command("stop_subscription"))
+@route.message(Command("stop_subscription"))
 async def cmd_stop_subscription(message: types.Message):
     asyncio.create_task(
         notify_server({
