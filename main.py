@@ -2,7 +2,10 @@ import os
 import asyncio
 import httpx
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import Update, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from aiogram.types import Update, InlineKeyboardButton, InlineKeyboardMarkup,
+    CallbackQuery, BotCommand, BotCommandScopeDefault,
+    BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats,
+    BotCommandScopeAllChatAdministrators
 from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
 from fastapi import FastAPI, Request
@@ -14,7 +17,6 @@ from google_sheets import authenticate_google_sheets, fetch_sheet_data
 from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN
 from messages import MESSAGES
 # from Stripe_hosted.bot.middlewares.i18n import MyI18nMiddleware, i18n
-from aiogram.types import BotCommand, BotCommandScopeDefault
 from database import get_language_by_tg_id, set_language
 from AI_text_paraphrasing import normalize
 # -----------------------
@@ -73,7 +75,13 @@ dp = Dispatcher()
 background_tasks_started = False
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await bot.delete_my_commands(scope=BotCommandScopeDefault())
+    for sc in [
+        BotCommandScopeDefault(),
+        BotCommandScopeAllPrivateChats(),
+        BotCommandScopeAllGroupChats(),
+        BotCommandScopeAllChatAdministrators(),
+    ]:
+        await bot.delete_my_commands(scope=sc)
     await bot.set_my_commands(
         commands=[
             BotCommand(command="subscribe", description="Subscribe to the channel WorkersEU"),
@@ -98,7 +106,7 @@ async def telegram_webhook(update: dict):
     if "message" not in update and "callback_query" not in update:
         return {"ok": True}
     telegram_update = Update.model_validate(update)
-    await dp.feed_update(bot, telegram_update)
+    await dp.feed_webhook_update(bot=bot, update=telegram_update)
     return {"ok": True}
 
 async def send_invite(data):
@@ -211,6 +219,7 @@ async def notify_server(payload, webhook):
         )
 @dp.callback_query(F.data == "generate_payment_link_anyway")
 async def generate_link_anyway(callback: CallbackQuery):
+    await callback.message.edit_reply_markup(reply_markup=None)
     logging.info("Got Callback")
     telegram_id = callback.from_user.id
     conn = get_connection()
