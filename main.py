@@ -211,6 +211,7 @@ async def notify_server(payload, webhook):
         )
 @dp.callback_query(F.data == "generate_payment_link_anyway")
 async def generate_link_anyway(callback: CallbackQuery):
+    logging.info("Got Callback")
     telegram_id = callback.from_user.id
     conn = get_connection()
     try:
@@ -220,7 +221,7 @@ async def generate_link_anyway(callback: CallbackQuery):
     asyncio.create_task(
         notify_server({
             "telegram_id": telegram_id,
-            "allow_new_payment": True
+            "allow_new_payment": True,
         }, "create-checkout-session")
     )
 
