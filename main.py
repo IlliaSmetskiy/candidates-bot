@@ -202,7 +202,7 @@ async def webhook_stop_subscription(request: Request):
 # Aiogram Handlers
 # -----------------------
 
-@route.message(Command("start"))
+@router.message(Command("start"))
 async def cmd_start(message: types.Message):
     logging.info("Натиснуто кнопку старт")
     lang = message.from_user.language_code or "en"
@@ -219,7 +219,7 @@ async def notify_server(payload, webhook):
             f"https://admingw.pythonanywhere.com/{webhook}",
             json=payload
         )
-@route.callback_query(F.data == "generate_payment_link_anyway")
+@router.callback_query(F.data == "generate_payment_link_anyway")
 async def generate_link_anyway(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=None)
     logging.info("Got Callback")
@@ -239,7 +239,7 @@ async def generate_link_anyway(callback: CallbackQuery):
     await  callback.message.answer(MESSAGES["creating_payment_link"][lang])
     
 
-@route.message(Command("subscribe"))
+@router.message(Command("subscribe"))
 async def cmd_subscribe(message: types.Message, allow_new_payment=False):
     conn = get_connection()
     telegram_id = message.from_user.id
@@ -256,7 +256,7 @@ async def cmd_subscribe(message: types.Message, allow_new_payment=False):
 
     await message.answer(MESSAGES["creating_payment_link"][lang])
 
-@route.message(Command("stop_subscription"))
+@router.message(Command("stop_subscription"))
 async def cmd_stop_subscription(message: types.Message):
     asyncio.create_task(
         notify_server({
