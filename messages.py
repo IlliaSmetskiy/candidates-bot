@@ -17,6 +17,12 @@ MESSAGES = {
         "en": "It seems I’ve already sent you the payment link. If you’ve already paid for the subscription, just wait. If you haven’t received the link or encountered any other issues, click the button below.",
         "ru": "Похоже, я уже отправил вам ссылку для оплаты. Если вы уже оплатили подписку — просто подождите. Если ссылка не пришла или возникли другие проблемы, нажмите кнопку ниже.",
     },
+
+    "generate_anyway_button" {
+        "uk": "Нове посилання на оплату",
+        "en": "New payment link",
+        "ru": "Новая ссылка на оплату",
+    },
     
     "payment_link": {
         "uk": "Ваше посилання на оплату:\n{url}",
