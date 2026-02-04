@@ -107,6 +107,9 @@ async def health():
 async def telegram_webhook(update: dict):
     if "message" not in update and "callback_query" not in update:
         return {"ok": True}
+    logging.info("UPDATE: %s", update.keys())
+    if "callback_query" in update:
+        logging.info("CALLBACK DATA: %s", update["callback_query"].get("data"))
     telegram_update = Update.model_validate(update)
     await dp.feed_webhook_update(bot=bot, update=telegram_update)
     return {"ok": True}
