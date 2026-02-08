@@ -1,17 +1,20 @@
 MESSAGES = {
     # ===== GENERAL =====
     "start": {
-        "uk": "Привіт!\n/subscribe - Підписатися на канал\n"
+        "uk": "/subscribe - Підписатися на канал\n"
               "/language - Змінити мову\n"
               "/manage_subscription - Керувати підпискою\n"
+              "/help - Список команд\n"
               "Лишилися питання? - Пиши @illia_gw",
-        "en": "Hi!\n/subscribe - Subscribe to the channel\n"
+        "en": "/subscribe - Subscribe to the channel\n"
               "/language - Change language\n"
               "/manage_subscription - Manage subscription\n"
+              "/help - List of commands\n"
               "Any questions left? - Contact @illia_gw",
-        "ru": "Привет!\n/subscribe - Подписаться на канал\n"
+        "ru": "/subscribe - Подписаться на канал\n"
               "/language - Сменить язык\n"
               "/manage_subscription - Управление подпиской\n"
+              "/help - Список команд\n"
               "Остались вопросы? - Пишите @illia_gw",
     },
 
@@ -19,14 +22,17 @@ MESSAGES = {
         "uk": "/subscribe - Підписатися на канал\n"
               "/language - Змінити мову\n"
               "/manage_subscription - Керувати підпискою\n"
+              "/help - Список команд\n"
               "Лишилися питання? - Пиши @illia_gw",
         "en": "/subscribe - Subscribe to the channel\n"
               "/language - Change language\n"
               "/manage_subscription - Manage subscription\n"
+              "/help - List of commands\n"
               "Any questions left? - Contact @illia_gw",
         "ru": "/subscribe - Подписаться на канал\n"
               "/language - Сменить язык\n"
               "/manage_subscription - Управление подпиской\n"
+              "/help - Список команд\n"
               "Остались вопросы? - Пишите @illia_gw",
     },
 
