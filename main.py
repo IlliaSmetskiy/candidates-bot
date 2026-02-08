@@ -220,10 +220,18 @@ async def cmd_start(message: types.Message):
 
 async def notify_server(payload, webhook):
     async with httpx.AsyncClient(timeout=30) as client:
-        await client.post(
-            f"https://admingw.pythonanywhere.com/{webhook}",
-            json=payload
-        )
+        for attempt in range(4):
+            try:
+                r = await client.post(
+                    f"https://admingw.pythonanywhere.com/{webhook}",
+                    json=payload
+                )
+                r.raise_for_status()
+                return
+            except (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.NetworkError) as e:
+                wait_time = 0.5 * (2 ** attempt)
+                logging.error("notify_server network error (%s), retry in %.1fs", repr(e), wait_time)
+                await asyncio.sleep(wait_time)
 
 @router.message(Command("language"))
 async def cmd_language(message: types.Message):
