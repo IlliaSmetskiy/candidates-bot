@@ -90,6 +90,7 @@ async def lifespan(app: FastAPI):
             BotCommand(command="subscribe", description="Subscribe to the channel WorkersEU"),
             BotCommand(command="language", description="Change language"),
             BotCommand(command="manage_subscription", description="Stop subscription"),
+            BotCommand(command="help", description="Commands, admin contacts"),
         ],
         scope=BotCommandScopeDefault()
     )
