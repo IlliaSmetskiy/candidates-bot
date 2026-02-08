@@ -37,6 +37,13 @@ MESSAGES = {
     },
 
     # ===== SUBSCRIPTIONS =====
+
+    "manage_subscription": {
+        "uk": "Ви можете керувати своєю підпискою за посиланням:\n{url}",
+        "en": "You can manage your subscription here:\n{url}",
+        "ru": "Вы можете управлять своей подпиской по ссылке:\n{url}"
+    },
+
     "subscription_stopped": {
         "uk": "Ви успішно відписались від каналу. Шкода, що ви пішли — повертайтесь!",
         "en": "Your subscription has been successfully stopped. We’ll be happy to see you again!",

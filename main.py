@@ -15,7 +15,7 @@ import time
 from contextlib import asynccontextmanager
 from database import get_connection
 from google_sheets import authenticate_google_sheets, fetch_sheet_data
-from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN
+from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN, CUSTOMER_PORTAL_URL
 from messages import MESSAGES
 # from Stripe_hosted.bot.middlewares.i18n import MyI18nMiddleware, i18n
 from database import get_language_by_tg_id, set_language
@@ -89,6 +89,7 @@ async def lifespan(app: FastAPI):
         commands=[
             BotCommand(command="subscribe", description="Subscribe to the channel WorkersEU"),
             BotCommand(command="language", description="Change language"),
+            BotCommand(command="manage_subscription", description="Stop subscription"),
         ],
         scope=BotCommandScopeDefault()
     )
@@ -247,6 +248,17 @@ async def cmd_language(message: types.Message):
                 [InlineKeyboardButton(text="Русский", callback_data="ru")]]
     markup =  InlineKeyboardMarkup(inline_keyboard=keyboard)
     await message.answer(text=MESSAGES["commands"]["language"][lang], reply_markup=markup)
+
+@router.message(Command("manage_subscription"))
+async def cmd_manage(message: types.Message):
+    logging.info("Натиснуто кнопку manage_subscription")
+    conn = get_connection()
+    telegram_id = message.from_user.id
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
+    await bot.send_message(chat_id=telegram_id, text=MESSAGES["manage_subscription"][lang].format(url=CUSTOMER_PORTAL_URL))
 
 @router.callback_query(F.data.in_({"uk", "en", "ru"}))
 async def user_set_language(callback: CallbackQuery):

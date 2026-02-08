@@ -16,6 +16,8 @@ RAILWAY_DOMAIN = os.getenv("RAILWAY_DOMAIN")
 
 GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
 
+CUSTOMER_PORTAL_URL = os.getenv("CUSTOMER_PORTAL_URL")
+
 worksheet_names = ["Кандидати"]
 
 NEW_STATE = "Новий"
