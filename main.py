@@ -318,6 +318,16 @@ async def cmd_subscribe(message: types.Message, allow_new_payment=False):
 
     await message.answer(MESSAGES["creating_payment_link"][lang])
 
+@router.message(Command("help"))
+async def cmd_help(message: types.Message):
+    telegram_id = message.from_user.id
+    conn = get_connection()
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
+    await message.answer(text=MESSAGES["help"][lang])
+
 @router.message(Command("stop_subscription"))
 async def cmd_stop_subscription(message: types.Message):
     asyncio.create_task(

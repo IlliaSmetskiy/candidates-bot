@@ -6,6 +6,21 @@ MESSAGES = {
         "ru": "Привет! Чтобы подписаться, нажмите /subscribe",
     },
 
+    "help": {
+        "uk": "/subscribe - Підписатися на канал\n"
+              "/language - Змінити мову\n"
+              "/manage_subscription - Керувати підпискою\n"
+              "Лишилися питання? - Пиши @illia_gw",
+        "en": "/subscribe - Subscribe to the channel\n"
+              "/language - Change language\n"
+              "/manage_subscription - Manage subscription\n"
+              "Any questions left? - Contact @illia_gw",
+        "ru": "/subscribe - Подписаться на канал\n"
+              "/language - Сменить язык\n"
+              "/manage_subscription - Управление подпиской\n"
+              "Остались вопросы? - Пишите @illia_gw",
+    },
+
     "creating_payment_link": {
         "uk": "⏳ Створюю посилання на оплату...",
         "en": "⏳ Creating payment link...",
