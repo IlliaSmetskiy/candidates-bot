@@ -1,9 +1,18 @@
 MESSAGES = {
     # ===== GENERAL =====
     "start": {
-        "uk": "Привіт! Для підписки натисніть /subscribe",
-        "en": "Hi! To subscribe, click /subscribe",
-        "ru": "Привет! Чтобы подписаться, нажмите /subscribe",
+        "uk": "Привіт!\n/subscribe - Підписатися на канал\n"
+              "/language - Змінити мову\n"
+              "/manage_subscription - Керувати підпискою\n"
+              "Лишилися питання? - Пиши @illia_gw",
+        "en": "Hi!\n/subscribe - Subscribe to the channel\n"
+              "/language - Change language\n"
+              "/manage_subscription - Manage subscription\n"
+              "Any questions left? - Contact @illia_gw",
+        "ru": "Привет!\n/subscribe - Подписаться на канал\n"
+              "/language - Сменить язык\n"
+              "/manage_subscription - Управление подпиской\n"
+              "Остались вопросы? - Пишите @illia_gw",
     },
 
     "help": {
