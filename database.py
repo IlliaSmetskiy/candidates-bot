@@ -34,10 +34,17 @@ def set_language(conn, lang, tg_id):
                 WHERE telegram_id = %s
             """
             cur.execute(sql, (lang, tg_id))
+
+            if cur.rowcount == 0:
+                sql = """
+                    INSERT INTO users (telegram_id, language)
+                    VALUES (%s, %s)
+                """
+                cur.execute(sql, (lang, tg_id))
             conn.commit()
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        raise e
+        raise
 
 def get_language_by_tg_id(conn, tg_id):
     with conn.cursor() as cur:
