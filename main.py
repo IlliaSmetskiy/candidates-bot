@@ -8,6 +8,7 @@ from aiogram.types import (Update, InlineKeyboardButton, InlineKeyboardMarkup,
     BotCommandScopeAllChatAdministrators)
 from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.utils.formatting import Url
 from fastapi import FastAPI, Request
 import logging
@@ -263,16 +264,24 @@ async def cmd_manage(message: types.Message):
 
 @router.callback_query(F.data.in_({"uk", "en", "ru"}))
 async def user_set_language(callback: CallbackQuery):
-    await callback.answer()
+    try:
+        await callback.answer()
+    except TelegramBadRequest as e:
+        if "query is too old" not in str(e):
+            raise
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except TelegramBadRequest as e:
+        if "message is not modified" not in str(e):
+            raise
     lang = callback.data
-    await callback.message.edit_reply_markup(reply_markup=None)
     telegram_id = callback.from_user.id
     conn = get_connection()
     try:
         set_language(conn, lang, telegram_id)
     finally:
         conn.close()
-    await bot.send_message(chat_id=telegram_id, text=MESSAGES["lang_changed"][lang])
+    await callback.message.answer(text=MESSAGES["lang_changed"][lang])
 
 @router.callback_query(F.data == "generate_payment_link_anyway")
 async def generate_link_anyway(callback: CallbackQuery):
