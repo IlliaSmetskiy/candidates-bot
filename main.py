@@ -2,18 +2,23 @@ import os
 import asyncio
 import httpx
 from aiogram import Bot, Dispatcher, types, F, Router
+from aiogram.fsm.context import FSMContext
 from aiogram.types import (Update, InlineKeyboardButton, InlineKeyboardMarkup,
     CallbackQuery, BotCommand, BotCommandScopeDefault,
     BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats,
-    BotCommandScopeAllChatAdministrators)
+    BotCommandScopeAllChatAdministrators, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove)
 from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.utils.formatting import Url
 from fastapi import FastAPI, Request
 import logging
 import time
 from contextlib import asynccontextmanager
+
+from telebot.types import KeyboardButton, ReplyKeyboardMarkup
+
 from database import get_connection
 from google_sheets import authenticate_google_sheets, fetch_sheet_data
 from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN, CUSTOMER_PORTAL_URL
@@ -60,7 +65,13 @@ async def daily_post_candidates(worksheet: str, interval_hours: int = 24):
 
         # чекаємо 24 години (НЕ блокує loop)
         await asyncio.sleep(interval_hours * 60 * 60)
-
+async def get_language_from_db(telegram_id):
+    conn = get_connection()
+    try:
+        lang = get_language_by_tg_id(conn, telegram_id) or "en"
+    finally:
+        conn.close()
+    return lang
 # -----------------------
 # BOT
 # -----------------------
@@ -92,6 +103,7 @@ async def lifespan(app: FastAPI):
             BotCommand(command="language", description="Change language"),
             BotCommand(command="manage_subscription", description="Stop subscription"),
             BotCommand(command="help", description="Commands, admin contacts"),
+            BotCommand(command="post", description="Post your profile"),
         ],
         scope=BotCommandScopeDefault()
     )
@@ -126,11 +138,7 @@ async def send_invite(data):
                                                 expire_date=expire_ts,
                                                 member_limit=1 )
     url = invite.invite_link
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     logging.info("Інвайт посилання створено")
     await bot.send_message(chat_id=telegram_id, text=MESSAGES["invite_link"][lang].format(url=url))
     logging.info("Інвайт посилання надіслано")
@@ -145,11 +153,7 @@ async def webhook_send_invite(request: Request):
 async def text_user(data):
     mode = data["mode"]
     telegram_id = data["telegram_id"]
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     if mode == "checkout_session_is_pending":
         button = [[InlineKeyboardButton(text=MESSAGES['generate_anyway_button'][lang], callback_data="generate_payment_link_anyway")]]
         markup=InlineKeyboardMarkup(inline_keyboard=button)
@@ -168,11 +172,7 @@ async def webhook_text_user(request: Request):
 async def cmd_send_payment_link(data):
     url = data["url"]
     telegram_id = data["telegram_id"]
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     await bot.send_message(chat_id=telegram_id, text=MESSAGES["payment_link"][lang].format(url=url))
     return ({"status": "sent", "payment_link": url})
 
@@ -184,11 +184,7 @@ async def webhook_cmd_send_payment_link(request: Request):
 
 async def stop_subscription(data):
     telegram_id = data["telegram_id"]
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     await bot.send_message(telegram_id, MESSAGES["subscription_stopped"][lang])
     await bot.ban_chat_member(
         chat_id= CHANNEL_ID,
@@ -239,12 +235,8 @@ async def notify_server(payload, webhook):
 @router.message(Command("language"))
 async def cmd_language(message: types.Message):
     logging.info("Натиснуто кнопку language")
-    conn = get_connection()
     telegram_id = message.from_user.id
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     keyboard = [[InlineKeyboardButton(text="Українська", callback_data="uk")],
                 [InlineKeyboardButton(text="English", callback_data="en")],
                 [InlineKeyboardButton(text="Русский", callback_data="ru")]]
@@ -254,12 +246,8 @@ async def cmd_language(message: types.Message):
 @router.message(Command("manage_subscription"))
 async def cmd_manage(message: types.Message):
     logging.info("Натиснуто кнопку manage_subscription")
-    conn = get_connection()
     telegram_id = message.from_user.id
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     await bot.send_message(chat_id=telegram_id, text=MESSAGES["manage_subscription"][lang].format(url=CUSTOMER_PORTAL_URL))
 
 @router.callback_query(F.data.in_({"uk", "en", "ru"}))
@@ -289,11 +277,7 @@ async def generate_link_anyway(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=None)
     logging.info("Got Callback")
     telegram_id = callback.from_user.id
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     asyncio.create_task(
         notify_server({
             "telegram_id": telegram_id,
@@ -307,11 +291,7 @@ async def generate_link_anyway(callback: CallbackQuery):
 @router.message(Command("subscribe"))
 async def cmd_subscribe(message: types.Message, allow_new_payment=False):
     telegram_id = message.from_user.id
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
 
     member = await bot.get_chat_member(CHANNEL_ID, telegram_id)
     if member and member.status in ("member", "administrator", "creator"):
@@ -331,12 +311,43 @@ async def cmd_subscribe(message: types.Message, allow_new_payment=False):
 @router.message(Command("help"))
 async def cmd_help(message: types.Message):
     telegram_id = message.from_user.id
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     await message.answer(text=MESSAGES["help"][lang])
+
+class PostForm(StatesGroup):
+    waiting_for_text = State()
+
+@router.message(Command("post"))
+async def cmd_post_resume(message: types.Message, state: FSMContext):
+    telegram_id = message.from_user.id
+    lang = get_language_from_db(telegram_id)
+    button = [[KeyboardButton(text=MESSAGES["post_button"][lang])]]
+    markup = ReplyKeyboardMarkup(keyboard=button, resize_keyboard=True, one_time_keyboard=True)
+    await message.answer(text=MESSAGES["post"][lang], reply_markup=markup)
+    await state.set_state(PostForm.waiting_for_text)
+
+@router.message(PostForm.waiting_for_text, ~F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
+async def save_text(message: types.Message, state: FSMContext):
+    await state.update_data(waiting_for_text=message.text)
+    telegram_id = message.from_user.id
+    lang = get_language_from_db(telegram_id)
+    await message.answer(text=MESSAGES["post_info_is_saved"][lang])
+
+@router.message(PostForm.waiting_for_text, F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
+async def send_post_text_to_admin(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    post_text = str(data)
+    telegram_id = message.from_user.id
+    post_text = "📗 Анкета від користувача\n" + post_text + "\n" + "Від користувача:\n" + str(telegram_id)
+    lang = get_language_from_db(telegram_id)
+
+    if not post_text:
+        await message.answer(text=MESSAGES["no_post_info_id_send"][lang])
+        return
+    await message.answer(text=MESSAGES["form_is_under_revision"][lang], reply_markup=ReplyKeyboardRemove())
+    await state.clear()
+    await bot.send_message(chat_id=ADMIN_ID, text=post_text)
+
 
 @router.message(Command("stop_subscription"))
 async def cmd_stop_subscription(message: types.Message):
@@ -346,11 +357,7 @@ async def cmd_stop_subscription(message: types.Message):
         }, "stop-subscription")
     )
     telegram_id = message.from_user.id
-    conn = get_connection()
-    try:
-        lang = get_language_by_tg_id(conn, telegram_id) or "en"
-    finally:
-        conn.close()
+    lang = get_language_from_db(telegram_id)
     await message.answer(MESSAGES["subscription_stopped"][lang])
     await bot.ban_chat_member(
         chat_id= CHANNEL_ID,
