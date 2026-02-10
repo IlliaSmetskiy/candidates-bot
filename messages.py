@@ -37,39 +37,39 @@ MESSAGES = {
     },
 
     "post": {
-        "uk": "Заповніть інформацію про себе та відправте мені\n"
-              "Вашу анкету зможуть бачити роботодавці у нашому каналі WorkersEU\n"
+        "uk": "Заповніть інформацію про себе та відправте мені.\n"
+              "Вашу анкету зможуть бачити роботодавці у нашому каналі WorkersEU "
               "де вона з'явиться після перевірки\n"
-              "👤Ім’я:"
-              "📱Контакти:"
-              "🎂Вік:"
-              "🪪Громадянство:"
-              "👷‍♀️Спеціалізація:"
-              "✅Досвід:"
-              "🗣Мови:"
-              "📄Документи:",
-        "en": "Fill in your information and send to me\n"
-              "Employers will be able to see your profile in our WorkersEU channel\n"
+              "👤Ім’я:\n"
+              "📱Контакти:\n"
+              "🎂Вік:\n"
+              "🪪Громадянство:\n"
+              "👷‍♀️Спеціалізація:\n"
+              "✅Досвід:\n"
+              "🗣Мови:\n"
+              "📄Документи:\n",
+        "en": "Fill in your information and send to me.\n"
+              "Employers will be able to see your profile in our WorkersEU channel "
               "where it will appear after review\n"
-              "👤Name:"
-              "📱Contacts:"
+              "👤Name:\n"
+              "📱Contacts:\n"
               "🎂Age:"
-              "🪪Citizenship:"
-              "👷‍♀️Specialization:"
-              "✅Experience:"
-              "🗣Languages:"
-              "📄Documents:",
-        "ru": "Заполните информацию о себе и отправьте мне\n"
-              "Вашу анкету смогут видеть работодатели в нашем канале WorkersEU\n"
+              "🪪Citizenship:\n"
+              "👷‍♀️Specialization:\n"
+              "✅Experience:\n"
+              "🗣Languages:\n"
+              "📄Documents:\n",
+        "ru": "Заполните информацию о себе и отправьте мне.\n"
+              "Вашу анкету смогут видеть работодатели в нашем канале WorkersEU "
               "где она появится после проверки\n"
-              "👤Имя:"
-              "📱Контакты:"
+              "👤Имя:\n"
+              "📱Контакты:\n"
               "🎂Возраст:"
-              "🪪Гражданство:"
-              "👷‍♀️Специализация:"
-              "✅Опыт:"
-              "🗣Языки:"
-              "📄Документы:",
+              "🪪Гражданство:\n"
+              "👷‍♀️Специализация:\n"
+              "✅Опыт:\n"
+              "🗣Языки:\n"
+              "📄Документы:\n",
     },
 
     "post_button": {

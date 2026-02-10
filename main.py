@@ -319,9 +319,7 @@ class PostForm(StatesGroup):
 async def cmd_post_resume(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     lang = await get_language_from_db(telegram_id)
-    button = [[KeyboardButton(text=MESSAGES["post_button"][lang])]]
-    markup = ReplyKeyboardMarkup(keyboard=button, resize_keyboard=True, one_time_keyboard=True)
-    await message.answer(text=MESSAGES["post"][lang], reply_markup=markup)
+    await message.answer(text=MESSAGES["post"][lang])
     await state.set_state(PostForm.waiting_for_text)
 
 @router.message(PostForm.waiting_for_text, ~F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
@@ -329,7 +327,9 @@ async def save_text(message: types.Message, state: FSMContext):
     await state.update_data(waiting_for_text=message.text)
     telegram_id = message.from_user.id
     lang = await get_language_from_db(telegram_id)
-    await message.answer(text=MESSAGES["post_info_is_saved"][lang])
+    button = [[KeyboardButton(text=MESSAGES["post_button"][lang])]]
+    markup = ReplyKeyboardMarkup(keyboard=button, resize_keyboard=True, one_time_keyboard=True)
+    await message.answer(text=MESSAGES["post_info_is_saved"][lang], reply_markup=markup)
 
 @router.message(PostForm.waiting_for_text, F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
 async def send_post_text_to_admin(message: types.Message, state: FSMContext):
