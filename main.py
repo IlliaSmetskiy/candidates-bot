@@ -320,10 +320,6 @@ async def cmd_post_resume(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     lang = await get_language_from_db(telegram_id)
     button = [[KeyboardButton(text=MESSAGES["post_button"][lang])]]
-    import inspect
-    print("aiogram:", aiogram.__version__)
-    print("ReplyKeyboardMarkup module:", ReplyKeyboardMarkup.__module__)
-    print("ReplyKeyboardMarkup init:", inspect.signature(ReplyKeyboardMarkup.__init__))
     markup = ReplyKeyboardMarkup(keyboard=button, resize_keyboard=True, one_time_keyboard=True)
     await message.answer(text=MESSAGES["post"][lang], reply_markup=markup)
     await state.set_state(PostForm.waiting_for_text)
