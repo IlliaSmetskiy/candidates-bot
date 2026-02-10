@@ -322,22 +322,14 @@ async def cmd_post_resume(message: types.Message, state: FSMContext):
     await message.answer(text=MESSAGES["post"][lang])
     await state.set_state(PostForm.waiting_for_text)
 
-@router.message(PostForm.waiting_for_text, ~F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
+@router.message(PostForm.waiting_for_text)
 async def save_text(message: types.Message, state: FSMContext):
     await state.update_data(waiting_for_text=message.text)
     telegram_id = message.from_user.id
     lang = await get_language_from_db(telegram_id)
-    button = [[KeyboardButton(text=MESSAGES["post_button"][lang])]]
-    markup = ReplyKeyboardMarkup(keyboard=button, resize_keyboard=True, one_time_keyboard=True)
-    await message.answer(text=MESSAGES["post_info_is_saved"][lang], reply_markup=markup)
 
-@router.message(PostForm.waiting_for_text, F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
-async def send_post_text_to_admin(message: types.Message, state: FSMContext):
     data = await state.get_data()
     post_text = str(data)
-    telegram_id = message.from_user.id
-    post_text = "📗 Анкета від користувача\n" + post_text + "\n" + "Від користувача:\n" + str(telegram_id)
-    lang = await get_language_from_db(telegram_id)
 
     if not post_text:
         await message.answer(text=MESSAGES["no_post_info_id_send"][lang])
@@ -345,6 +337,21 @@ async def send_post_text_to_admin(message: types.Message, state: FSMContext):
     await message.answer(text=MESSAGES["form_is_under_revision"][lang], reply_markup=ReplyKeyboardRemove())
     await state.clear()
     await bot.send_message(chat_id=ADMIN_ID, text=post_text)
+
+# @router.message(PostForm.waiting_for_text, F.text.in_(["Опублікувати", "Publish", "Опубликовать"]))
+# async def send_post_text_to_admin(message: types.Message, state: FSMContext):
+#     data = await state.get_data()
+#     post_text = str(data)
+#     telegram_id = message.from_user.id
+#     post_text = "📗 Анкета від користувача\n" + post_text + "\n" + "Від користувача:\n" + str(telegram_id)
+#     lang = await get_language_from_db(telegram_id)
+#
+#     if not post_text:
+#         await message.answer(text=MESSAGES["no_post_info_id_send"][lang])
+#         return
+#     await message.answer(text=MESSAGES["form_is_under_revision"][lang], reply_markup=ReplyKeyboardRemove())
+#     await state.clear()
+#     await bot.send_message(chat_id=ADMIN_ID, text=post_text)
 
 
 @router.message(Command("stop_subscription"))
