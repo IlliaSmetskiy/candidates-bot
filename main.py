@@ -17,9 +17,6 @@ from fastapi import FastAPI, Request
 import logging
 import time
 from contextlib import asynccontextmanager
-
-from telebot.types import KeyboardButton, ReplyKeyboardMarkup
-
 from database import get_connection
 from google_sheets import authenticate_google_sheets, fetch_sheet_data
 from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN, CUSTOMER_PORTAL_URL
