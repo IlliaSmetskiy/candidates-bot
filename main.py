@@ -140,7 +140,7 @@ async def send_invite(data):
     expire_ts = data["expire_ts"]
     telegram_id = data["telegram_id"]
     invite = await bot.create_chat_invite_link( chat_id=CHANNEL_ID,
-                                                expire_date=expire_ts,
+                                                # expire_date=expire_ts,
                                                 member_limit=1 )
     url = invite.invite_link
     lang = await get_language_from_db(telegram_id)
