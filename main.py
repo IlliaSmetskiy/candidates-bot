@@ -85,7 +85,8 @@ dp.include_router(router)
 
 async def is_user_banned(chat_id, user_id):
     member = await bot.get_chat_member(chat_id, user_id)
-    return member.status == "kicked"
+    logging.info(f"Memder.status: {member.status}")
+    return member.status == "kicked" or member.status == "restricted"
 
 # -----------------------
 # FASTAPI SERVER
