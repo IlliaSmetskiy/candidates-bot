@@ -53,10 +53,10 @@ async def post_candidates(worksheet):
     if not messages:
         logging.info("Нема нових кандидатів")
         return
-    for message in messages:
+    for raw_message, message in zip(raw_messages, messages):
         if message:
             channel_sent_message = await bot.send_message(CHANNEL_ID,message)
-            set_message(channel_sent_message.message_id, raw_messages)
+            set_message(channel_sent_message.message_id, raw_message)
     logging.info("Кандидатів запощено!")
     return 0
 
