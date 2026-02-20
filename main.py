@@ -100,10 +100,12 @@ async def is_user_banned(chat_id, user_id):
 # -----------------------
 # FASTAPI SERVER
 # -----------------------
-
+background_task: asyncio.Task | None = None
 background_tasks_started = False
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global background_tasks_started, background_task
+
     for sc in [
         BotCommandScopeDefault(),
         BotCommandScopeAllPrivateChats(),
@@ -111,6 +113,7 @@ async def lifespan(app: FastAPI):
         BotCommandScopeAllChatAdministrators(),
     ]:
         await bot.delete_my_commands(scope=sc)
+
     await bot.set_my_commands(
         commands=[
             BotCommand(command="subscribe", description="Subscribe to the channel WorkersEU"),
@@ -122,17 +125,27 @@ async def lifespan(app: FastAPI):
         scope=BotCommandScopeDefault()
     )
     await bot.set_my_commands(
-        commands=[
-            BotCommand(command="admin_post", description="Verifying the candidate's form and posting it"),
-        ],
+        commands=[BotCommand(command="admin_post", description="Verifying the candidate's form and posting it")],
         scope=BotCommandScopeChat(chat_id=ADMIN_ID)
     )
-    global background_tasks_started
 
     if not background_tasks_started:
-        asyncio.create_task(daily_post_candidates("Кандидати"))
+        background_task = asyncio.create_task(daily_post_candidates("Кандидати"))
         background_tasks_started = True
-    yield
+
+    try:
+        yield
+    finally:
+        # shutdown: зупиняємо фон таск
+        if background_task:
+            background_task.cancel()
+            try:
+                await background_task
+            except asyncio.CancelledError:
+                pass
+
+        # shutdown: закриваємо aiohttp session, яку створив aiogram Bot
+        await bot.session.close()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -411,7 +424,7 @@ async def cmd_stop_subscription(message: types.Message):
 @router.message(StateFilter(None), F.text)  # ловимо тільки текст
 async def catch_all(message: types.Message):
     tg_id = message.from_user.id
-    lang = get_language_from_db(tg_id)
+    lang = await get_language_from_db(tg_id)
 
     origin = message.forward_origin
 
@@ -420,7 +433,7 @@ async def catch_all(message: types.Message):
         return
     message_id = origin.message_id
 
-    full_message = await asyncio.to_thread(get_message(message_id), message_id)
+    full_message = await asyncio.to_thread(get_message,message_id)
 
     if not full_message:
         await message.answer(text=MESSAGES["failed_get_contacts"][lang])
