@@ -7,9 +7,9 @@ from aiogram.types import (Update, InlineKeyboardButton, InlineKeyboardMarkup,
     CallbackQuery, BotCommand, BotCommandScopeDefault,
     BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats,
     BotCommandScopeAllChatAdministrators, BotCommandScopeChat,
-    ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove)
+    ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, MessageOriginChannel)
 
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.client.default import DefaultBotProperties
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.state import State, StatesGroup
@@ -23,8 +23,10 @@ from google_sheets import authenticate_google_sheets, fetch_sheet_data
 from config import format_message, CHANNEL_ID, RAILWAY_DOMAIN, CUSTOMER_PORTAL_URL, ADMIN_ID
 from messages import MESSAGES
 # from Stripe_hosted.bot.middlewares.i18n import MyI18nMiddleware, i18n
-from database import get_language_by_tg_id, set_language
+from database import get_language_by_tg_id, set_language, get_message, set_message
 from AI_text_paraphrasing import normalize
+from urllib.parse import urlparse
+import mysql.connector
 # -----------------------
 # ENV
 # -----------------------
@@ -38,16 +40,23 @@ BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL")
 if not TELEGRAM_BOT_TOKEN:
     raise RuntimeError("No TELEGRAM_BOT_TOKEN in .env")
 
+def hide_contacts(message:str):
+    last_newline = message.rindex("\n")
+    cut_message = message[:last_newline]
+    return cut_message
+
 async def post_candidates(worksheet):
     client = authenticate_google_sheets()
     data, _, keys = fetch_sheet_data(client, worksheet)
-    messages = normalize(data)
+    raw_messages = normalize(data)
+    messages = [hide_contacts(m) for m in raw_messages]
     if not messages:
         logging.info("Нема нових кандидатів")
         return
     for message in messages:
         if message:
-            await bot.send_message(CHANNEL_ID,message)
+            channel_sent_message = await bot.send_message(CHANNEL_ID,message)
+            set_message(channel_sent_message.message_id, raw_messages)
     logging.info("Кандидатів запощено!")
     return 0
 
@@ -323,6 +332,11 @@ async def cmd_subscribe(message: types.Message, allow_new_payment=False):
 
     await message.answer(MESSAGES["creating_payment_link"][lang])
 
+
+@router.message(not F.data.in_("help", "post", ""))
+
+
+
 @router.message(Command("help"))
 async def cmd_help(message: types.Message):
     telegram_id = message.from_user.id
@@ -398,3 +412,23 @@ async def cmd_stop_subscription(message: types.Message):
         user_id= telegram_id,
         only_if_banned=True
     )
+
+@router.message(StateFilter(None), F.text)  # ловимо тільки текст
+async def catch_all(message: types.Message):
+    tg_id = message.from_user.id
+    lang = get_language_from_db(tg_id)
+
+    origin = message.forward_origin
+
+    if not isinstance(origin, MessageOriginChannel):
+        await message.answer(text=MESSAGES["send_message_from_channel_please"][lang])
+        return
+    message_id = origin.message_id
+
+    full_message = await asyncio.to_thread(get_message(message_id), message_id)
+
+    if not full_message:
+        await message.answer(text=MESSAGES["failed_get_contacts"][lang])
+        return
+
+    await message.answer(text=MESSAGES["get_contacts"][lang] + full_message)

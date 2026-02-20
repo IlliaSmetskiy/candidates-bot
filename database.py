@@ -19,6 +19,48 @@ def get_connection():
         database="railway",
     )
 
+def set_message(id, message):
+    url = urlparse(os.getenv("MESSAGES_MYSQL_PUBLIC_URL"))
+    conn = mysql.connector.connect(
+        host=url.hostname,
+        port=url.port,
+        user=url.username,
+        password=url.password,
+        database="railway",
+    )
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO messages (message_id, full_message)
+                VALUES %s %s
+                ON DUPLICATE KEY UPDATE
+                full_message VALUES(full_message)
+                """,
+                (id, message),
+            )
+    finally:
+        conn.close()
+
+def get_message(message_id):
+    url = urlparse(os.getenv("MESSAGES_MYSQL_PUBLIC_URL"))
+    conn = mysql.connector.connect(
+        host=url.hostname,
+        port=url.port,
+        user=url.username,
+        password=url.password,
+        database="railway",
+    )
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT full_message FROM messages WHERE message_id = %s",
+                (message_id,),
+            )
+            row = cur.fetchone()
+            return str(row[0]) if row else None
+    finally:
+        conn.close()
+
 ALLOWED_FIELDS = {
     "subscription_id",
     "subscription_active",

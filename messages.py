@@ -123,6 +123,12 @@ MESSAGES = {
         "ru": "⏳ Создаю ссылку на оплату...",
     },
 
+    "payment_failed": {
+        "uk": "Помилка платежу",
+        "en": "Payment failed",
+        "ru": "Ошибка платежа",
+    },
+
     "generate_payment_link_anyway": {
         "uk": "Здається, я вже надсилав вам посилання на оплату. Якщо ви вже оплатили підписку - просто почекайте. Якщо посилання не прийшло, або виникли інші проблеми, натисніть кнопку знизу.",
         "en": "It seems I’ve already sent you the payment link. If you’ve already paid for the subscription, just wait. If you haven’t received the link or encountered any other issues, click the button below.",

@@ -24,13 +24,13 @@ Your task:
 4. Return STRICT string in ukrainian with fields:
 
 👤Ім’я:
-📱Контакти:
 🎂Вік:
 🪪Громадянство:
 👷‍♀️Спеціалізація:
 ✅Досвід:
 🗣Мови:
 📄Документи:
+📱Контакти:
 
 If some info is missing, return empty string in that field.
 Do NOT invent information.
