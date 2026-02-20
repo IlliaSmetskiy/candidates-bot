@@ -32,12 +32,13 @@ def set_message(id, message):
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO messages (message_id, full_message)
-                VALUES %s %s
+                VALUES (%s, %s)
                 ON DUPLICATE KEY UPDATE
-                full_message VALUES(full_message)
+                full_message = VALUES(full_message)
                 """,
                 (id, message),
             )
+            conn.commit()
     finally:
         conn.close()
 
