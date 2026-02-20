@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6f2a914-e3dd-4381-86ff-78035df4c12a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/fastapi.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/fastapi.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AI_text_paraphrasing.py" beforeDir="false" afterPath="$PROJECT_DIR$/AI_text_paraphrasing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/messages.py" beforeDir="false" afterPath="$PROJECT_DIR$/messages.py" afterDir="false" />
-    </list>
+    <list default="true" id="c6f2a914-e3dd-4381-86ff-78035df4c12a" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

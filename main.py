@@ -332,11 +332,6 @@ async def cmd_subscribe(message: types.Message, allow_new_payment=False):
 
     await message.answer(MESSAGES["creating_payment_link"][lang])
 
-
-@router.message(not F.data.in_("help", "post", ""))
-
-
-
 @router.message(Command("help"))
 async def cmd_help(message: types.Message):
     telegram_id = message.from_user.id
